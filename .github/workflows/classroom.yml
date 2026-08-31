@@ -1,0 +1,86 @@
+name: Autograding Tests
+'on':
+  - push
+  - workflow_dispatch
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Integrity check - tests, pom.xml and grading.json must be unchanged
+        run: |
+          EXPECTED="f5768f36ea4c40ac0df6a8c14694185da52dd0678df2ba566719d3906753fbe4"
+          ACTUAL=$( (for f in $(find src/test/java -type f -name '*.java' | LC_ALL=C sort) pom.xml grading.json; do sed 's/\r$//' "$f"; done) | sha256sum | cut -d' ' -f1)
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::The test files, pom.xml, or grading.json in this repository differ from the assignment template. Grading has been stopped. Restore the original files (git checkout origin/main -- src/test pom.xml grading.json) and push again."
+            exit 1
+          fi
+          echo "Integrity check passed."
+      - name: "add(obj) (20)"
+        id: add
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "add(obj)"
+          setup-command: ''
+          command: mvn -B -q test -Dtest=AddTest -Dsurefire.failIfNoSpecifiedTests=false
+          timeout: 5
+          max-score: 20
+      - name: "add(index, obj) (25)"
+        id: addoverloaded
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "add(index, obj)"
+          setup-command: ''
+          command: mvn -B -q test -Dtest=AddOverloadedTest -Dsurefire.failIfNoSpecifiedTests=false
+          timeout: 5
+          max-score: 25
+      - name: "removeEnd (20)"
+        id: removeend
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "removeEnd"
+          setup-command: ''
+          command: mvn -B -q test -Dtest=RemoveEndTest -Dsurefire.failIfNoSpecifiedTests=false
+          timeout: 5
+          max-score: 20
+      - name: "remove(index) (25)"
+        id: remove
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "remove(index)"
+          setup-command: ''
+          command: mvn -B -q test -Dtest=RemoveTest -Dsurefire.failIfNoSpecifiedTests=false
+          timeout: 5
+          max-score: 25
+      - name: "dump (10)"
+        id: dump
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "dump"
+          setup-command: ''
+          command: mvn -B -q test -Dtest=DumpTest -Dsurefire.failIfNoSpecifiedTests=false
+          timeout: 5
+          max-score: 10
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          ADD_RESULTS: "${{ steps.add.outputs.result }}"
+          ADDOVERLOADED_RESULTS: "${{ steps.addoverloaded.outputs.result }}"
+          REMOVEEND_RESULTS: "${{ steps.removeend.outputs.result }}"
+          REMOVE_RESULTS: "${{ steps.remove.outputs.result }}"
+          DUMP_RESULTS: "${{ steps.dump.outputs.result }}"
+        with:
+          runners: add,addoverloaded,removeend,remove,dump

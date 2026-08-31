@@ -1,0 +1,7 @@
+[
+ {"test": "AddTest",           "name": "add(obj)",        "points": 20},
+ {"test": "AddOverloadedTest", "name": "add(index, obj)", "points": 25},
+ {"test": "RemoveEndTest",     "name": "removeEnd",       "points": 20},
+ {"test": "RemoveTest",        "name": "remove(index)",   "points": 25},
+ {"test": "DumpTest",          "name": "dump",            "points": 10}
+]

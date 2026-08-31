@@ -1,23 +1,19 @@
-// This class is a simple class that holds a number and a string
-// that we can use with our ArrayClass and ArrayList
-// We can use the same object for both
+/** PROVIDED - do not change
+ * A simple object holding a number and a string. ArrayClass stores these, and
+ * the tests compare them through toString():
+ *     new TestObject(1, "Ron").toString()  ->  "Test Object: 1 : Ron"
+ */
 public class TestObject {
 
-	private int num;
-	private String str;
-	
-	// Constructor
-	public TestObject(int num, String str)
-	{
-		this.num = num;
-		this.str = str;
-	}
-	
-	// Prints out the TestObject
-	public String toString()
-	{
-		String s = "";
-		s = s + "Test Object: " + num + " : " + str;
-		return s;
-	}
+    private int num;
+    private String str;
+
+    public TestObject(int num, String str) {
+        this.num = num;
+        this.str = str;
+    }
+
+    public String toString() {
+        return "Test Object: " + num + " : " + str;
+    }
 }
